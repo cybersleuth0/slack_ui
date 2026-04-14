@@ -45,3 +45,18 @@ app.*.map.json
 /android/app/release
 # Added by code-review-graph
 .code-review-graph/
+
+# AI tool configs (local only)
+.claude/
+.gemini/
+.qwen/
+.mcp.json
+.cursorrules
+.windsurfrules
+
+# Editor metadata
+.metadata
+.flutter-plugins-dependencies
+
+# IntelliJ / Android Studio
+slack_ui.iml
