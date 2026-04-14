@@ -5,7 +5,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.11+-blue?logo=flutter)](https://flutter.dev)
 [![Provider](https://img.shields.io/badge/State%20Management-Provider-61dafb)](https://pub.dev/packages/provider)
 [![Architecture](https://img.shields.io/badge/Architecture-MVC-green)](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)
-[![Download APK](https://img.shields.io/badge/Download-APK%20v1.0-brightgreen?logo=android)](releases/slack_ui.apk)
+[![Download APK](https://img.shields.io/badge/Download-APK%20v1.0-brightgreen?logo=android)](https://github.com/cybersleuth0/slack_ui/raw/main/releases/slack_ui.apk)
 
 ---
 
@@ -13,7 +13,7 @@
 
 > **For Interviewers**: Download and install the APK directly on any Android device.
 
-[⬇️ **Download slack_ui.apk** (50.5 MB)](releases/slack_ui.apk)
+[⬇️ **Download slack_ui.apk** (50.5 MB)](https://github.com/cybersleuth0/slack_ui/raw/main/releases/slack_ui.apk)
 
 > ℹ️ Enable **"Install from unknown sources"** in Android Settings before installing.
 
