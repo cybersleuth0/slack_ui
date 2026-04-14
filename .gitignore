@@ -53,6 +53,7 @@ app.*.map.json
 .mcp.json
 .cursorrules
 .windsurfrules
+AGENTS.md
 
 # Editor metadata
 .metadata

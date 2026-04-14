@@ -1,9 +1,20 @@
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
-import "views/splash_screen.dart";
+import "package:provider/provider.dart";
+import "core/app_routes.dart";
+import "controllers/auth_controller.dart";
+import "controllers/chat_controller.dart";
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthController()),
+        ChangeNotifierProvider(create: (_) => ChatController()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -17,9 +28,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4A154B), brightness: Brightness.light),
         useMaterial3: true,
-        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+        textTheme: GoogleFonts.interTextTheme(),
       ),
-      home: const SplashScreen(),
+      initialRoute: AppRoutes.splash,
+      onGenerateRoute: AppRoutes.onGenerateRoute,
+      builder: (context, child) =>
+          GestureDetector(onTap: () => FocusManager.instance.primaryFocus?.unfocus(), child: child),
     );
   }
 }

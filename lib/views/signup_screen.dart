@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
-import "package:slack_ui/views/login_screen.dart";
-import "package:slack_ui/views/main_screen.dart";
+import "package:provider/provider.dart";
+import "package:slack_ui/controllers/auth_controller.dart";
 import "package:slack_ui/views/widgets/LogoBanner.dart";
+import "../core/app_routes.dart";
 
-/// Sign Up screen matching Slack's registration flow
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -36,8 +36,10 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  /// Validate all fields and enable/disable button
+  bool _isLoading = false;
+
   void _validateForm() {
+    if (_isLoading) return;
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -46,24 +48,41 @@ class _SignupScreenState extends State<SignupScreen> {
     final isEmailValid = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email);
     final isPasswordValid = password.length >= 8;
 
-    setState(() {
-      _isButtonEnabled = isNameValid && isEmailValid && isPasswordValid;
-    });
+    final newIsButtonEnabled = isNameValid && isEmailValid && isPasswordValid;
+    if (_isButtonEnabled != newIsButtonEnabled) {
+      setState(() {
+        _isButtonEnabled = newIsButtonEnabled;
+      });
+    }
   }
 
-  /// Handle sign up action
-  void _handleSignUp() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Store user session locally
-      // Navigate to main screen
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return FadeTransition(opacity: animation, child: const MainScreen());
-          },
-          transitionDuration: const Duration(milliseconds: 400),
-        ),
+  void _handleSignUp() async {
+    if (_formKey.currentState!.validate() && !_isLoading) {
+      setState(() {
+        _isLoading = true;
+        _isButtonEnabled = false;
+      });
+
+      final auth = context.read<AuthController>();
+      final success = await auth.signup(
+        _nameController.text.trim(),
+        _emailController.text.trim(),
+        _passwordController.text,
       );
+
+      if (!mounted) return;
+
+      if (success) {
+        Navigator.of(context).pushReplacementNamed(AppRoutes.main);
+      } else {
+        setState(() {
+          _isLoading = false;
+          _isButtonEnabled = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Sign up failed. Check inputs."), backgroundColor: Color(0xFFD93025)),
+        );
+      }
     }
   }
 
@@ -95,10 +114,11 @@ class _SignupScreenState extends State<SignupScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              // Slack logo banner
+              // Main Slack App Logo Banner
               buildLogoBanner(),
               const SizedBox(height: 40),
-              // Name field
+
+              // Full Name Input Section
               Text(
                 "Your name",
                 style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF1A1D21)),
@@ -136,7 +156,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              // Email field
               Text(
                 "Your email address",
                 style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF1A1D21)),
@@ -175,7 +194,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              // Password field
               Text(
                 "Create a password",
                 style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF1A1D21)),
@@ -226,7 +244,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Password requirements
               Text(
                 "Use at least 8 characters. We recommend using a mix of letters, numbers, and symbols.",
                 style: GoogleFonts.inter(
@@ -237,20 +254,28 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              // Submit button
+
+              // Animated Submit Registration Button
               ElevatedButton(
-                onPressed: _isButtonEnabled ? _handleSignUp : null,
+                onPressed: _isButtonEnabled || _isLoading ? _handleSignUp : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _isButtonEnabled ? const Color(0xFF4A154B) : const Color(0xFFE8E8E8),
-                  foregroundColor: _isButtonEnabled ? Colors.white : const Color(0xFF616061),
+                  backgroundColor: (_isButtonEnabled || _isLoading) ? const Color(0xFF4A154B) : const Color(0xFFE8E8E8),
+                  foregroundColor: (_isButtonEnabled || _isLoading) ? Colors.white : const Color(0xFF616061),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   elevation: 0,
                 ),
-                child: Text("Continue", style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : Text("Continue", style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
-              const SizedBox(height: 24),
-              // Sign in link
+              const SizedBox(height: 40),
+
+              // Redirect to Login Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -260,7 +285,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+                      Navigator.of(context).pushReplacementNamed(AppRoutes.login);
                     },
                     child: Text(
                       "Sign In",

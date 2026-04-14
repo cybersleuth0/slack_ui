@@ -1,6 +1,5 @@
 import "package:flutter/cupertino.dart";
 
-/// Build the Slack logo banner with isometric icon
 Widget buildLogoBanner() {
   return Container(
     height: 160,

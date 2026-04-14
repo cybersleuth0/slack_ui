@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
-import "package:slack_ui/views/main_screen.dart";
-import "package:slack_ui/views/signup_screen.dart";
+import "package:provider/provider.dart";
+import "package:slack_ui/controllers/auth_controller.dart";
 import "package:slack_ui/views/widgets/LogoBanner.dart";
+import "../core/app_routes.dart";
 
-/// Sign In screen matching Slack's login flow
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -33,29 +33,49 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  /// Validate email and enable/disable button
+  bool _isLoading = false;
+
   void _validateEmail() {
+    if (_isLoading) return;
+
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final isEmailValid = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email);
     final isPasswordValid = password.isNotEmpty;
-    setState(() {
-      _isButtonEnabled = isEmailValid && isPasswordValid;
-    });
+    final newIsButtonEnabled = isEmailValid && isPasswordValid;
+    if (_isButtonEnabled != newIsButtonEnabled) {
+      setState(() {
+        _isButtonEnabled = newIsButtonEnabled;
+      });
+    }
   }
 
-  /// Handle sign in action
-  void _handleSignIn() {
-    if (_formKey.currentState!.validate()) {
-      // Navigate to main screen (simulate successful sign in)
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return FadeTransition(opacity: animation, child: const MainScreen());
-          },
-          transitionDuration: const Duration(milliseconds: 400),
-        ),
-      );
+  void _handleSignIn() async {
+    if (_formKey.currentState!.validate() && !_isLoading) {
+      setState(() {
+        _isLoading = true;
+        _isButtonEnabled = false;
+      });
+
+      final auth = context.read<AuthController>();
+      final success = await auth.login(_emailController.text.trim(), _passwordController.text);
+
+      if (!mounted) return;
+
+      if (success) {
+        Navigator.of(context).pushReplacementNamed(AppRoutes.main);
+      } else {
+        setState(() {
+          _isLoading = false;
+          _isButtonEnabled = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Invalid email or password. Password must be 6+ chars."),
+            backgroundColor: Color(0xFFD93025),
+          ),
+        );
+      }
     }
   }
 
@@ -83,16 +103,16 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              // Slack logo banner
+              // Main Slack App Logo Banner
               buildLogoBanner(),
               const SizedBox(height: 40),
-              // Email label
+
+              // Email Input Area
               Text(
                 "Your email address",
                 style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF1A1D21)),
               ),
               const SizedBox(height: 12),
-              // Email input field
               Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8F8F8),
@@ -128,13 +148,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              // Password label
+
+              // Password Input Area
               Text(
                 "Your password",
                 style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF1A1D21)),
               ),
               const SizedBox(height: 12),
-              // Password input field
               Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8F8F8),
@@ -179,20 +199,28 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
 
               const SizedBox(height: 32),
-              // Next button
+
+              // Animated Submit Button Wrapper
               ElevatedButton(
-                onPressed: _isButtonEnabled ? _handleSignIn : null,
+                onPressed: _isButtonEnabled || _isLoading ? _handleSignIn : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _isButtonEnabled ? const Color(0xFF4A154B) : const Color(0xFFE8E8E8),
-                  foregroundColor: _isButtonEnabled ? Colors.white : const Color(0xFF616061),
+                  backgroundColor: (_isButtonEnabled || _isLoading) ? const Color(0xFF4A154B) : const Color(0xFFE8E8E8),
+                  foregroundColor: (_isButtonEnabled || _isLoading) ? Colors.white : const Color(0xFF616061),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   elevation: 0,
                 ),
-                child: Text("Continue", style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : Text("Continue", style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
-              const SizedBox(height: 40),
-              // Sign up link
+              const SizedBox(height: 24),
+
+              // Redirect to Signup Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -202,20 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).push(
-                        PageRouteBuilder(
-                          pageBuilder: (context, animation, secondaryAnimation) {
-                            return const SignupScreen();
-                          },
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                            const begin = Offset(0.0, 1.0);
-                            const end = Offset.zero;
-                            const curve = Curves.easeInOut;
-                            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                            return SlideTransition(position: animation.drive(tween), child: child);
-                          },
-                        ),
-                      );
+                      Navigator.of(context).pushNamed(AppRoutes.signup);
                     },
                     child: Text(
                       "Sign Up",
