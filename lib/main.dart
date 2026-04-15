@@ -6,6 +6,9 @@ import "controllers/auth_controller.dart";
 import "controllers/chat_controller.dart";
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Use only bundled fonts — no internet required
+  GoogleFonts.config.allowRuntimeFetching = false;
   runApp(
     MultiProvider(
       providers: [

@@ -12,43 +12,18 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  late final Future<void> _fontsPending;
-
   bool _fontsLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    _fontsPending = _preloadFonts();
     _initializeApp();
-  }
-
-  Future<void> _preloadFonts() async {
-    await GoogleFonts.pendingFonts([
-      GoogleFonts.inter(fontWeight: FontWeight.w400),
-      GoogleFonts.inter(fontWeight: FontWeight.w500),
-      GoogleFonts.inter(fontWeight: FontWeight.w600),
-      GoogleFonts.inter(fontWeight: FontWeight.w700),
-      GoogleFonts.inter(fontWeight: FontWeight.w800),
-      GoogleFonts.inter(fontWeight: FontWeight.w900),
-    ]);
-
-    _preloadOtherFonts();
-  }
-
-  Future<void> _preloadOtherFonts() async {
-    await GoogleFonts.pendingFonts([
-      GoogleFonts.inter(fontWeight: FontWeight.w300),
-      GoogleFonts.inter(fontWeight: FontWeight.w400, fontStyle: FontStyle.italic),
-    ]);
   }
 
   Future<void> _initializeApp() async {
     // 1. Give the splash screen UI time to construct its first frame
     await Future.delayed(const Duration(milliseconds: 100));
 
-    // 2. Wait for fonts to finish
-    await _fontsPending;
 
     if (mounted) {
       setState(() {
