@@ -11,7 +11,7 @@
 
 ## 📥 Download & Install
 
-> **For Interviewers**: Download and install the APK directly on any Android device. No internet required — fonts are bundled locally.
+> **For Interviewers**: Download and install the APK directly on any Android device.
 
 [⬇️ **Download slack_ui.apk** (19.9 MB)](https://github.com/cybersleuth0/slack_ui/raw/main/releases/slack_ui.apk)
 
