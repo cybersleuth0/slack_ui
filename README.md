@@ -5,15 +5,15 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.11+-blue?logo=flutter)](https://flutter.dev)
 [![Provider](https://img.shields.io/badge/State%20Management-Provider-61dafb)](https://pub.dev/packages/provider)
 [![Architecture](https://img.shields.io/badge/Architecture-MVC-green)](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)
-[![Download APK](https://img.shields.io/badge/Download-APK%20v1.0-brightgreen?logo=android)](https://github.com/cybersleuth0/slack_ui/raw/main/releases/slack_ui.apk)
+[![Download APK](https://img.shields.io/badge/Download-APK%20v1.1-brightgreen?logo=android)](https://github.com/cybersleuth0/slack_ui/raw/main/releases/slack_ui.apk)
 
 ---
 
 ## 📥 Download & Install
 
-> **For Interviewers**: Download and install the APK directly on any Android device.
+> **For Interviewers**: Download and install the APK directly on any Android device. No internet required — fonts are bundled locally.
 
-[⬇️ **Download slack_ui.apk** (50.5 MB)](https://github.com/cybersleuth0/slack_ui/raw/main/releases/slack_ui.apk)
+[⬇️ **Download slack_ui.apk** (19.9 MB)](https://github.com/cybersleuth0/slack_ui/raw/main/releases/slack_ui.apk)
 
 > ℹ️ Enable **"Install from unknown sources"** in Android Settings before installing.
 
@@ -22,11 +22,9 @@
 ## 🎯 Project Highlights
 
 ✅ **MVC Architecture**: Clean separation of Data (Models), Logic (Controllers), and UI (Views).  
-✅ **Provider State Management**: High-performance reactive state handling for real-time chat feel.  
-✅ **Jank-Free Performance**: Optimized for 60fps+ with minimized widget rebuilds and layout thrashing.  
-✅ **Human-Readable Code**: Well-documented, intuitive code structure designed for interview scrutiny.  
-✅ **Session Persistence**: Automatic login state recovery via `shared_preferences`.
-
+✅ **Provider State Management**: Granular `context.select` for minimal widget rebuilds.  
+✅ **Real Credential Validation**: Signup saves credentials; login verifies them via `SharedPreferences`.  
+✅ **Named Routes**: Centralized `AppRoutes` class — no screen imports another screen directly.
 ---
 
 ## 📱 Visual Showcase
@@ -45,12 +43,13 @@
 
 | Feature | Implementation Details |
 |---------|----------------------|
-| **Dynamic Workspace** | Expandable/collapsible sections for Channels and DMs with interactive badges. |
-| **Real-time Messaging** | Simulated messaging lifecycle with granular loading states and instant delivery. |
-| **Global Message Search** | Cross-chat content indexing with keyword **highlighting** in results. |
-| **Smart Auth Flow** | Login verifies against credentials saved at signup via `SharedPreferences`. |
-| **Named Routes** | Centralized `AppRoutes` class for clean, decoupled navigation. |
-| **Material 3 Design** | Modern Slack-inspired UI with Inter typography and custom design tokens. |
+| **Dynamic Workspace** | Expandable/collapsible sections for Channels and DMs with unread badges. |
+| **Real-time Messaging** | In-memory messaging with `Consumer<ChatController>` for targeted rebuilds. |
+| **Global Message Search** | Cross-chat content search with keyword **highlighting** using `RichText`. |
+| **Smart Auth Flow** | Signup saves email + password; login checks against stored credentials. |
+| **Active Highlighting** | Selected channel/DM turns purple via `activeChatId` state in controller. |
+| **Named Routes** | `AppRoutes.onGenerateRoute` handles all navigation with typed argument passing. |
+| **Offline Fonts** | Inter font family bundled as TTF assets — no `fonts.gstatic.com` calls. |
 
 ---
 
@@ -59,29 +58,30 @@
 ```mermaid
 graph TD
     A[View Layer] -->|User Actions| B[Controller Layer]
-    B -->|Notify Listeners| A
+    B -->|notifyListeners| A
     B -->|State Updates| C[Model Layer]
     C -->|Data Structures| B
     B -->|Persistence| D[Shared Preferences]
+    E[AppRoutes] -->|Named Navigation| A
 ```
 
 ### Key Architectural Decisions:
-1. **MVC Pattern** to separate business logic from UI, facilitating easier unit testing and maintenance.
-2. **Provider (ChangeNotifier)** for focused rebuilds, ensuring only the necessary widgets refresh on state change.
-3. **Performance First**: Implemented image pre-caching and optimized font loading in `SplashScreen` to eliminate startup jank.
-4. **Declarative UI**: Leveraged Google Fonts and custom Slack-inspired design tokens for a premium aesthetic.
+1. **MVC Pattern**: Business logic in Controllers, data in Models, pure UI in Views.
+2. **Provider (ChangeNotifier)**: `context.select` for pinpoint rebuilds — only affected widgets redraw.
+3. **Named Routes**: `AppRoutes` class decouples all screens — no circular imports.
+4. **Offline-First Fonts**: `GoogleFonts.config.allowRuntimeFetching = false` + bundled TTF files.
 
 ---
 
 ## 🛠️ Tech Stack & Packages
 
-| Package             | Usage                                      | Version    |
-|---------------------|--------------------------------------------|------------|
-| `provider`          | Reactive state management & dependency injection | ^6.1.5     |
-| `google_fonts`      | Premium typography and workplace aesthetics | ^8.0.2     |
-| `shared_preferences`| Local session persistence and auth tracking | ^2.5.5     |
-| `intl`              | Precise timestamp formatting for messages   | ^0.20.2    |
-| `cupertino_icons`   | Supplemental glyphs for platform adherence  | ^1.0.8     |
+| Package              | Usage                                           | Version    |
+|----------------------|-------------------------------------------------|------------|
+| `provider`           | Reactive state management & dependency injection | ^6.1.5     |
+| `google_fonts`       | Font API (Inter bundled locally as TTF assets)  | ^8.0.2     |
+| `shared_preferences` | Session persistence & credential storage        | ^2.5.5     |
+| `intl`               | Timestamp formatting for messages               | ^0.20.2    |
+| `cupertino_icons`    | Supplemental platform icons                     | ^1.0.8     |
 
 ---
 
@@ -108,19 +108,18 @@ flutter run
 
 ```text
 slack_ui/
-├── ScreenShots/
-│   ├── splash_Screen.png
-│   ├── signin_screen.png
-│   ├── SignUp_screen.png
-│   ├── Home_screen.png
-│   ├── DM_screen.png
-│   └── search_screen.png
+├── ScreenShots/               # UI screenshots for README
+├── assets/
+│   ├── fonts/                 # Bundled Inter TTF files (offline-ready)
+│   └── images/                # App assets (Slack logo etc.)
+├── releases/
+│   └── slack_ui.apk           # Release APK v1.1
 lib/
 ├── core/
-│   └── app_routes.dart
+│   └── app_routes.dart        # Centralized named route definitions
 ├── controllers/
-│   ├── auth_controller.dart
-│   └── chat_controller.dart
+│   ├── auth_controller.dart   # Login, signup, session management
+│   └── chat_controller.dart   # Messages, channels, DMs, search
 ├── models/
 │   ├── channel.dart
 │   ├── message.dart
