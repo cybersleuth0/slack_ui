@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:slack_ui/controllers/auth_controller.dart";
-import "package:slack_ui/views/login_screen.dart";
+import "package:slack_ui/core/app_routes.dart";
 
 class SharedProfileAvatar extends StatelessWidget {
   const SharedProfileAvatar({super.key});
@@ -17,9 +17,10 @@ class SharedProfileAvatar extends StatelessWidget {
         if (value == "logout") {
           await context.read<AuthController>().logout();
           if (context.mounted) {
-            Navigator.of(
-              context,
-            ).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false);
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRoutes.login,
+              (route) => false,
+            );
           }
         }
       },
@@ -43,8 +44,10 @@ class SharedProfileAvatar extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFFD4B8D4),
               borderRadius: BorderRadius.circular(10),
-              shape: BoxShape.rectangle,
-              image: const DecorationImage(image: NetworkImage("https://i.pravatar.cc/100?img=11"), fit: BoxFit.cover),
+              image: const DecorationImage(
+                image: AssetImage("assets/images/user_icon.jpeg"),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           Positioned(

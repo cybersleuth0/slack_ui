@@ -127,7 +127,7 @@ class HomeView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         scrollDirection: Axis.horizontal,
         children: [
-          _topCard(iconWidget: _catchUpIcon(), title: "Catch up", subtitle: "5 new", isSelected: true),
+          _topCard(iconWidget: const Icon(Icons.workspaces_rounded, color: kPurpleMid, size: 22), title: "Catch up", subtitle: "5 new", isSelected: true),
           _topCard(
             iconWidget: const Icon(Icons.bookmark_border_rounded, color: kTextSecondary, size: 22),
             title: "Later",
@@ -148,23 +148,7 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Widget _catchUpIcon() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        const Icon(Icons.workspaces_rounded, color: kPurpleMid, size: 22),
-        Positioned(
-          right: -4,
-          top: -4,
-          child: Container(
-            width: 9,
-            height: 9,
-            decoration: const BoxDecoration(color: kPurpleMid, shape: BoxShape.circle),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _topCard({
     required Widget iconWidget,
@@ -214,8 +198,6 @@ class HomeView extends StatelessWidget {
     int badge = 0,
     bool isBold = false,
   }) {
-    final isActive = context.select<ChatController, bool>((c) => c.activeChatId == id);
-
     return InkWell(
       onTap: () {
         Navigator.pushNamed(
@@ -225,19 +207,19 @@ class HomeView extends StatelessWidget {
         );
       },
       child: Container(
-        color: isActive ? const Color(0xFFF5EFF6) : Colors.transparent,
+        color: Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           children: [
-            Icon(Icons.tag, size: 19, color: isActive ? kPurpleMid : (isBold ? kTextPrimary : kTextSecondary)),
+            Icon(Icons.tag, size: 19, color: isBold ? kTextPrimary : kTextSecondary),
             const SizedBox(width: 14),
             Expanded(
               child: Text(
                 name,
                 style: GoogleFonts.inter(
                   fontSize: 15,
-                  fontWeight: (isActive || isBold) ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? kPurpleMid : kTextPrimary,
+                  fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+                  color: kTextPrimary,
                 ),
               ),
             ),
@@ -281,8 +263,6 @@ class HomeView extends StatelessWidget {
     final colors = [const Color(0xFFE8A838), const Color(0xFF7C3085), const Color(0xFF2BAC76), const Color(0xFFCC4E2A)];
     final bg = colors[name.length % colors.length];
 
-    final isActive = context.select<ChatController, bool>((c) => c.activeChatId == id);
-
     return InkWell(
       onTap: () {
         Navigator.pushNamed(
@@ -292,7 +272,7 @@ class HomeView extends StatelessWidget {
         );
       },
       child: Container(
-        color: isActive ? const Color(0xFFF5EFF6) : Colors.transparent,
+        color: Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [

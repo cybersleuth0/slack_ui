@@ -18,15 +18,16 @@ class MessageScreen extends StatefulWidget {
 
 class _MessageScreenState extends State<MessageScreen> {
   final TextEditingController _messageController = TextEditingController();
+  late final ChatController _chatController;
 
   @override
   void initState() {
     super.initState();
+    _chatController = context.read<ChatController>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final chatProvider = context.read<ChatController>();
-      chatProvider.setActiveChat(widget.chatId);
+      _chatController.setActiveChat(widget.chatId);
       if (widget.isChannel) {
-        chatProvider.markChannelAsRead(widget.chatId);
+        _chatController.markChannelAsRead(widget.chatId);
       }
     });
   }
@@ -34,6 +35,8 @@ class _MessageScreenState extends State<MessageScreen> {
   @override
   void dispose() {
     _messageController.dispose();
+    // Clear active highlight when leaving the screen
+    _chatController.setActiveChat(null);
     super.dispose();
   }
 
